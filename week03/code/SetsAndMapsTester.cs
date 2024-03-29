@@ -107,7 +107,23 @@ public static class SetsAndMapsTester {
     /// that there were no duplicates) and therefore should not be displayed.
     /// </summary>
     /// <param name="words">An array of 2-character words (lowercase, no duplicates)</param>
-    private static void DisplayPairs(string[] words) {
+    public static void DisplayPairs(List<string> words)
+{
+    var wordSet = new HashSet<string>(words);
+    var pairs = new HashSet<Tuple<string, string>>();
+    foreach (var word in wordSet)
+    {
+        var reverseWord = new string(word.Reverse().ToArray());
+        if (wordSet.Contains(reverseWord) && word != reverseWord)
+        {
+            pairs.Add(Tuple.Create(word, reverseWord));
+        }
+    }
+    foreach (var pair in pairs)
+    {
+        Console.WriteLine($"{pair.Item1} & {pair.Item2}");
+    }
+}
         // To display the pair correctly use something like:
         // Console.WriteLine($"{word} & {pair}");
         // Each pair of words should displayed on its own line.
@@ -127,15 +143,29 @@ public static class SetsAndMapsTester {
     /// #############
     /// # Problem 2 #
     /// #############
-    private static Dictionary<string, int> SummarizeDegrees(string filename) {
-        var degrees = new Dictionary<string, int>();
-        foreach (var line in File.ReadLines(filename)) {
-            var fields = line.Split(",");
-            // Todo Problem 2 - ADD YOUR CODE HERE
+    public static Dictionary<string, int> SummarizeDegrees(string filename)
+{
+    var degreeDict = new Dictionary<string, int>();
+    using (var reader = new StreamReader(filename))
+    {
+        while (!reader.EndOfStream)
+        {
+            var line = reader.ReadLine();
+            var values = line.Split(',');
+            var degree = values[3];
+            if (degreeDict.ContainsKey(degree))
+            {
+                degreeDict[degree]++;
+            }
+            else
+            {
+                degreeDict[degree] = 1;
+            }
         }
-
-        return degrees;
     }
+    return degreeDict;
+}
+
 
     /// <summary>
     /// Determine if 'word1' and 'word2' are anagrams.  An anagram
@@ -156,10 +186,14 @@ public static class SetsAndMapsTester {
     /// #############
     /// # Problem 3 #
     /// #############
-    private static bool IsAnagram(string word1, string word2) {
-        // Todo Problem 3 - ADD YOUR CODE HERE
-        return false;
-    }
+    public static bool IsAnagram(string word1, string word2)
+{
+    word1 = word1.Replace(" ", "").ToLower();
+    word2 = word2.Replace(" ", "").ToLower();
+    var charCount1 = word1.GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
+    var charCount2 = word2.GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
+    return charCount1.SequenceEqual(charCount2);
+}
 
     /// <summary>
     /// Sets up the maze dictionary for problem 4
@@ -230,10 +264,13 @@ public static class SetsAndMapsTester {
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
         var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, options);
+        foreach (var feature in featureCollection.Features)
+    {
+        Console.WriteLine($"{feature.Properties.Place} - Mag {feature.Properties.Mag}");
+    }
+}
 
         // TODO:
         // 1. Add code in FeatureCollection.cs to describe the JSON using classes and properties 
         // on those classes so that the call to Deserialize above works properly.
         // 2. Add code below to print out each place a earthquake has happened today and its magitude.
-    }
-}
